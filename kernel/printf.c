@@ -15,6 +15,22 @@
 #include "defs.h"
 #include "proc.h"
 
+void
+backtrace(void)
+{
+  uint64 fp = r_fp();
+  struct proc *p = myproc();
+
+  printf("backtrace:\n");
+
+  while (fp && fp >= (uint64)p->kstack && fp < (uint64)p->kstack + PGSIZE) {
+      uint64 ra = *(uint64 *)(fp - 8);
+      printf("  ra 0x%lx\n", ra);
+      // printf("  ra %p\n", (void*)ra);
+      fp = *(uint64 *)(fp - 16);
+  }
+}
+
 volatile int panicked = 0;
 
 // lock to avoid interleaving concurrent printf's.
@@ -162,6 +178,7 @@ printf(char *fmt, ...)
 void
 panic(char *s)
 {
+  backtrace();
   pr.locking = 0;
   printf("panic: ");
   printf("%s\n", s);
