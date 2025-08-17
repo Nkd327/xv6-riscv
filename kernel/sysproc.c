@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 
+
 uint64
 sys_exit(void)
 {
@@ -64,6 +65,8 @@ sys_sleep(void)
   argint(0, &n);
   if(n < 0)
     n = 0;
+  
+  backtrace();
   acquire(&tickslock);
   ticks0 = ticks;
   while(ticks - ticks0 < n){
@@ -97,4 +100,22 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+extern void argint(int n, int *ip);
+
+// uint64 
+// sys_trace(void) {
+//     int mask;
+//     if (argint(0, &mask) < 0) return -1;
+//     myproc()->trace_mask = mask;
+//     return 0;
+// }
+
+uint64 
+sys_trace(void) {
+    int mask;
+    argint(0, &mask);   // just call it; no return value
+    myproc()->trace_mask = mask;
+    return 0;
 }

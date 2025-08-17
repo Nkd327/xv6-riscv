@@ -285,6 +285,7 @@ fork(void)
   safestrcpy(np->name, p->name, sizeof(p->name));
 
   pid = np->pid;
+  np->trace_mask = p->trace_mask;
 
   release(&np->lock);
 
@@ -294,6 +295,7 @@ fork(void)
 
   acquire(&np->lock);
   np->state = RUNNABLE;
+
   release(&np->lock);
 
   return pid;
@@ -660,12 +662,12 @@ void
 procdump(void)
 {
   static char *states[] = {
-  [UNUSED]    "unused",
-  [USED]      "used",
-  [SLEEPING]  "sleep ",
-  [RUNNABLE]  "runble",
-  [RUNNING]   "run   ",
-  [ZOMBIE]    "zombie"
+  [UNUSED]  =  "unused",
+  [USED]    =  "used",
+  [SLEEPING] = "sleep ",
+  [RUNNABLE] = "runble",
+  [RUNNING]  = "run   ",
+  [ZOMBIE]   = "zombie"
   };
   struct proc *p;
   char *state;

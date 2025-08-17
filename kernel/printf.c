@@ -18,6 +18,22 @@
 volatile int panicking = 0; // printing a panic message
 volatile int panicked = 0; // spinning forever at end of a panic
 
+void
+backtrace(void)
+{
+  uint64 fp = r_fp();
+  struct proc *p = myproc();
+
+  printf("backtrace:\n");
+
+  while (fp && fp >= (uint64)p->kstack && fp < (uint64)p->kstack + PGSIZE) {
+      uint64 ra = *(uint64 *)(fp - 8);
+      printf("  ra 0x%lx\n", ra);
+      // printf("  ra %p\n", (void*)ra);
+      fp = *(uint64 *)(fp - 16);
+  }
+}
+
 // lock to avoid interleaving concurrent printf's.
 static struct {
   struct spinlock lock;
@@ -137,6 +153,8 @@ void
 panic(char *s)
 {
   panicking = 1;
+  backtrace();
+  pr.locking = 0;
   printf("panic: ");
   printf("%s\n", s);
   panicked = 1; // freeze uart output from other CPUs
